@@ -1,22 +1,16 @@
 <template>
   <div class="home">
     <h2>  Currency Table </h2> 
-
-      <table class="table table-striped">
+  <table class="table table-striped">
   <thead>
     <tr>
-      <th>Id </th>
-      <th> Name  </th>
-      <th> Symbol </th>
-      <th> Market Cap (USD) </th> 
-      <th> Price (USD) </th> 
-      <th> Change % in 24 Hours </th> 
+      <th v-for="column in columnNames()"> {{ column }}</th>
     </tr>
   </thead>
   <tbody>
     <tr v-for="currency in currencies">
        <th scope="row">{{ currency.id }}</th>  
-       <td>{{ currency.name }}</td> 
+       <td> {{ currency.name }} </td> 
        <td>{{  currency.symbol }}</td>  
        <td>{{  currency.market_cap_usd }} </td>
        <td>{{  currency.price_usd }} </td>
@@ -28,10 +22,21 @@
 </template>
 
 <style>
-table,
-th,
-td {
-  border: 1px solid black;
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td,
+th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
 }
 </style>
 
@@ -42,8 +47,10 @@ export default {
     return {
       message: "Welcome to Vue.js!",
       currencies: [],
+      column: [],
     };
   },
+
   created: function () {
     this.indexCurrencies();
   },
@@ -51,6 +58,21 @@ export default {
     indexCurrencies: function () {
       axios.get("/currencies").then((response) => {
         console.log("currencies loaded", response);
+        this.currencies = response.data;
+      });
+    },
+    columnNames: function () {
+      const names = new Set();
+      for (const row of this.currencies) {
+        for (const key of Object.keys(row)) {
+          names.add(key);
+        }
+      }
+      return names;
+    },
+    sortPrice: function () {
+      axios.post("/by_price").then((response) => {
+        console.log("sorted by price!", response.data);
         this.currencies = response.data;
       });
     },
