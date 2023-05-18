@@ -4,7 +4,7 @@
   <table class="table table-striped">
   <thead>
     <tr>
-      <th v-for="column in columnNames()"> {{ column }}</th>
+      <th v-on:click="sortPrice(column)" v-for="column in columnNames()"> {{ column }}</th>
     </tr>
   </thead>
   <tbody>
@@ -48,6 +48,7 @@ export default {
       message: "Welcome to Vue.js!",
       currencies: [],
       column: [],
+      currentColumn: {},
     };
   },
 
@@ -70,9 +71,17 @@ export default {
       }
       return names;
     },
-    sortPrice: function () {
-      axios.post("/by_price").then((response) => {
-        console.log("sorted by price!", response.data);
+    sortPrice: function (column) {
+      axios.post("/by_price", this.currentColumn).then((response) => {
+        this.currentColumn.column = column;
+        if (this.currentColumn.direction == null) {
+          this.currentColumn.direction = true;
+        } else if (this.currentColumn.direction == false) {
+          this.currentColumn.direction = true;
+        } else if (this.currentColumn.direction == true) {
+          this.currentColumn.direction = false;
+        }
+        console.log(this.currentColumn, response.data);
         this.currencies = response.data;
       });
     },
