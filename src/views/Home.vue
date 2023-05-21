@@ -1,48 +1,30 @@
 <template>
   <div class="home">
-    <h2>  Currency Table </h2> 
-    <!-- {{ currencies }} -->
-  
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th v-on:click="sortList('name')"> Name </th> 
-        <th v-on:click="sortList('symbol')"> Symbol  </th> 
-        <th v-on:click="sortList('market_cap_usd')"> Market Cap (USD) </th> 
-        <th v-on:click="sortList('price_usd')"> Price USD  </th> 
-        <th v-on:click="sortList('change_percent_24hr')"> Change % 24 Hr  </th> 
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="currency in currencies">
-        <td>{{ currency.name }}</td>
-        <td>{{ currency.symbol }}</td>
-        <td>{{ currency.market_cap_usd }}</td>
-        <td>{{ currency.price_usd }}</td>
-        <td>{{ currency.change_percent_24hr }}</td>
-      </tr>
-    </tbody>
-  </table>
-  
-  
-  
-  <!-- <table class="table table-striped">
-  <thead>
-    <tr>
-      <th v-for="column in columnNames()"> {{ column }}</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-for="currency in currencies">
-       <th scope="row">{{ currency.id }}</th>  
-       <td> {{ currency.name }} </td> 
-       <td>{{  currency.symbol }}</td>  
-       <td>{{  currency.market_cap_usd }} </td>
-       <td>{{  currency.price_usd }} </td>
-       <td>{{  currency.change_percent_24hr }} </td> 
-    </tr>
-   </tbody>
-</table>  -->
+    <div class="container">
+      <h2>  Currency Table </h2> 
+      <input v-model="search" class="form-control" placeholder="Filter Based on Ticker" /> 
+      {{ search }}
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th v-on:click="sortList('name')"> <a href="#">  Name </a> </th> 
+            <th v-on:click="sortList('symbol')"> <a href="#">  Symbol </a> </th> 
+            <th v-on:click="sortList('market_cap_usd')"> <a href="#">  Market Cap (USD) </a>  </th> 
+            <th v-on:click="sortList('price_usd')"><a href="#">  Price USD </a>  </th> 
+            <th v-on:click="sortList('change_percent_24hr')"> <a href="#"> Change % 24 Hr </a> </th> 
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="currency in filterList(currencies)">
+            <td>{{ currency.name }}</td>
+            <td>{{ currency.symbol }}</td>
+            <td> $ {{ currency.market_cap_usd.toLocaleString() }}</td>
+            <td> $ {{ currency.price_usd.toLocaleString() }}</td>
+            <td>{{ currency.change_percent_24hr.toLocaleString() }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -70,8 +52,7 @@ import axios from "axios";
 export default {
   data: function () {
     return {
-      message: "Welcome to Vue.js!",
-      sortedData: [],
+      data: [],
       sortedbyASC: true,
       search: "",
       currencies: [],
@@ -85,15 +66,25 @@ export default {
       axios.get("/currencies").then((response) => {
         console.log("currencies loaded", response);
         this.currencies = response.data;
-        this.sortedData = response.data;
+        this.data = response.data;
       });
+    },
+    filterList: function (currencies) {
+      if (this.search) {
+        return currencies.filter((currency) => {
+          return currency.symbol
+            .toLowerCase()
+            .includes(this.search.toLowerCase());
+        });
+      }
+      return currencies;
     },
     sortList: function (sortBy) {
       if (this.sortedbyASC) {
-        this.sortedData.sort((x, y) => (x[sortBy] > y[sortBy] ? -1 : 1));
+        this.data.sort((x, y) => (x[sortBy] > y[sortBy] ? -1 : 1));
         this.sortedbyASC = false;
       } else {
-        this.sortedData.sort((x, y) => (x[sortBy] < y[sortBy] ? -1 : 1));
+        this.data.sort((x, y) => (x[sortBy] < y[sortBy] ? -1 : 1));
         this.sortedbyASC = true;
       }
     },
