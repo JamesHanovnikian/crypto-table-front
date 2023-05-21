@@ -6,14 +6,13 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th v-for="column in columns">
-          <a v-on:click="sortBy(column)" href="#">
-            {{ column }}
-          </a>
-        </th>
+        <th v-on:click="sortList('name')"> Name </th> 
+        <th v-on:click="sortList('symbol')"> Symbol  </th> 
+        <th v-on:click="sortList('market_cap_usd')"> Market Cap (USD) </th> 
+        <th v-on:click="sortList('price_usd')"> Price USD  </th> 
+        <th v-on:click="sortList('change_percent_24hr')"> Change % 24 Hr  </th> 
       </tr>
     </thead>
-
     <tbody>
       <tr v-for="currency in currencies">
         <td>{{ currency.name }}</td>
@@ -72,48 +71,31 @@ export default {
   data: function () {
     return {
       message: "Welcome to Vue.js!",
-      sortKey: "name",
-      reverse: false,
+      sortedData: [],
+      sortedbyASC: true,
       search: "",
       currencies: [],
-      sortedCurrencies: [],
-      columns: [
-        "name",
-        "symbol",
-        "market_cap_usd",
-        "price_usd",
-        "change_percent_24hr",
-      ],
     };
   },
-
-  created: function () {
+  created() {
     this.indexCurrencies();
-    this.sortedData();
   },
   methods: {
     indexCurrencies: function () {
       axios.get("/currencies").then((response) => {
         console.log("currencies loaded", response);
         this.currencies = response.data;
+        this.sortedData = response.data;
       });
     },
-    sortedData: function () {
-      var sortCurrencies = this.currencies.sort((x, y) =>
-        x[this.sortKey] < y[this.sortKey]
-          ? 1
-          : x[this.sortKey] < y[this.sortKey]
-          ? -1
-          : 0
-      );
-      this.sortedCurrencies = sortCurrencies;
-      console.log(this.sortedCurrencies);
-    },
-    sortBy: function (sortKey) {
-      this.reverse = (this.sortKey = sortKey) ? !this.reverse : false;
-      console.log(this.reverse);
-      this.sortKey = sortKey;
-      console.log(this.sortKey);
+    sortList: function (sortBy) {
+      if (this.sortedbyASC) {
+        this.sortedData.sort((x, y) => (x[sortBy] > y[sortBy] ? -1 : 1));
+        this.sortedbyASC = false;
+      } else {
+        this.sortedData.sort((x, y) => (x[sortBy] < y[sortBy] ? -1 : 1));
+        this.sortedbyASC = true;
+      }
     },
   },
 };
